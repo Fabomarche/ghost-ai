@@ -20,6 +20,9 @@
 # production
 /build
 
+# trigger.dev
+.trigger
+
 # misc
 .DS_Store
 *.pem
