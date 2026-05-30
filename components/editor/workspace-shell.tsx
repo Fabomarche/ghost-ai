@@ -12,42 +12,13 @@ import { RenameProjectDialog } from "@/components/editor/rename-project-dialog";
 import { DeleteProjectDialog } from "@/components/editor/delete-project-dialog";
 import { ShareDialog } from "@/components/editor/share-dialog";
 import { EditorProvider } from "@/components/editor/editor-context";
+import { LiveblocksCanvas } from "@/components/editor/liveblocks-canvas";
 import { useProjectActions } from "@/hooks/use-project-actions";
 import type { Project } from "@/types/projects";
 
 interface WorkspaceShellProps {
   project: { id: string; roomId: string; name: string; isOwner: boolean };
   projects: Project[];
-}
-
-function CanvasPlaceholder() {
-  return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-gradient-to-b from-base via-base to-accent-dim/20">
-      <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-surface-border bg-surface/80">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          className="h-8 w-8 text-brand"
-          strokeWidth={1.5}
-          stroke="currentColor"
-        >
-          <circle cx="12" cy="12" r="9" />
-          <path d="M12 3v4M12 17v4M3 12h4M17 12h4" />
-        </svg>
-      </div>
-      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-copy-faint">
-        Workspace Shell
-      </p>
-      <h2 className="max-w-md text-center text-xl font-medium text-copy-primary">
-        Canvas and collaboration tooling land here next.
-      </h2>
-      <p className="max-w-md text-center text-sm leading-relaxed text-copy-muted">
-        This room is ready for the shared architecture canvas, durable AI
-        workflows, and real-time presence. For now, the shell is wired with
-        project context and navigation only.
-      </p>
-    </div>
-  );
 }
 
 function AiSidebar() {
@@ -199,7 +170,7 @@ export function WorkspaceShell({ project, projects }: WorkspaceShellProps) {
       />
 
       <div className="flex flex-1 overflow-hidden">
-        <CanvasPlaceholder />
+        <LiveblocksCanvas roomId={project.roomId} />
         {aiSidebarOpen && <AiSidebar />}
       </div>
 

@@ -174,3 +174,13 @@ textarea,
 select {
   color: var(--text-primary);
 }
+
+.react-flow {
+  background: var(--bg-base);
+}
+
+.react-flow__minimap {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
