@@ -25,6 +25,7 @@ import { CanvasNodeRenderer } from "@/components/editor/canvas-node";
 import { ShapePanel } from "@/components/editor/shape-panel";
 import { ShapeDragPreview } from "@/components/editor/shape-drag-preview";
 import { CanvasActionsContext } from "@/components/editor/canvas-actions";
+import { NodeColorToolbar } from "@/components/editor/node-color-toolbar";
 import { NODE_COLORS, SHAPE_DEFAULT_SIZES } from "@/types/canvas";
 
 const nodeTypes = {
@@ -142,6 +143,7 @@ function FlowCanvas() {
             data: {
               label: "",
               color: NODE_COLORS[0].fill,
+              textColor: NODE_COLORS[0].text,
               shape,
               width: defaults.width,
               height: defaults.height,
@@ -171,13 +173,15 @@ function FlowCanvas() {
 
   if (isLoading) return <CanvasLoading />;
 
+  const selectedNodeIds = nodes.filter((n) => n.selected).map((n) => n.id);
+
   return (
-    <div
-      className="relative flex flex-1"
-      onDragOver={handleCanvasDragOver}
-      onDrop={handleDrop}
-    >
-      <CanvasActionsContext.Provider value={{ onNodeDataChange: handleNodeDataChange }}>
+    <CanvasActionsContext.Provider value={{ onNodeDataChange: handleNodeDataChange }}>
+      <div
+        className="relative flex flex-1"
+        onDragOver={handleCanvasDragOver}
+        onDrop={handleDrop}
+      >
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -197,16 +201,17 @@ function FlowCanvas() {
             size={1}
           />
         </ReactFlow>
-      </CanvasActionsContext.Provider>
-      <ShapePanel onDragStart={handleShapeDragStart} />
-      {draggingShape && (
-        <ShapeDragPreview
-          shape={draggingShape}
-          x={dragPosition.x}
-          y={dragPosition.y}
-        />
-      )}
-    </div>
+        <ShapePanel onDragStart={handleShapeDragStart} />
+        {draggingShape && (
+          <ShapeDragPreview
+            shape={draggingShape}
+            x={dragPosition.x}
+            y={dragPosition.y}
+          />
+        )}
+        <NodeColorToolbar selectedNodeIds={selectedNodeIds} />
+      </div>
+    </CanvasActionsContext.Provider>
   );
 }
 

@@ -163,7 +163,7 @@ interface ResizeState {
 }
 
 export function CanvasNodeRenderer({ id, data, selected }: NodeProps<CanvasNode>) {
-  const { label, color, shape } = data;
+  const { label, color, textColor, shape } = data;
   const defaults = SHAPE_DEFAULT_SIZES[data.shape] ?? SHAPE_DEFAULT_SIZES.rectangle;
   const width = data.width ?? defaults.width;
   const height = data.height ?? defaults.height;
@@ -308,17 +308,18 @@ export function CanvasNodeRenderer({ id, data, selected }: NodeProps<CanvasNode>
           onClick={(e) => e.stopPropagation()}
           onDoubleClick={(e) => e.stopPropagation()}
           rows={1}
-          className="pointer-events-auto absolute left-1/2 top-1/2 z-50 resize-none overflow-hidden rounded border border-white/30 bg-transparent px-2 py-1 text-center text-sm font-medium text-[var(--text-primary)] outline-none"
+          className="pointer-events-auto absolute left-1/2 top-1/2 z-50 resize-none overflow-hidden rounded border border-white/30 bg-transparent px-2 py-1 text-center text-sm font-medium outline-none"
           style={{
             transform: "translate(-50%, -50%)",
             minHeight: 28,
             maxHeight: 120,
             width: "calc(100% - 24px)",
+            color: textColor,
           }}
         />
       ) : (
         <div className="absolute inset-0 flex items-center justify-center" onDoubleClick={handleDoubleClick}>
-          <span className="pointer-events-none text-sm font-medium">
+          <span className="pointer-events-none text-sm font-medium" style={{ color: textColor }}>
             {label || (
               <span className="text-[var(--text-faint)] select-none">
                 {shape === "circle" ? "Event" : shape === "cylinder" ? "Store" : "Label"}

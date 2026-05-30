@@ -3,6 +3,7 @@ import type { Node, Edge } from "@xyflow/react";
 export interface NodeData extends Record<string, unknown> {
   label: string;
   color: string;
+  textColor: string;
   shape: (typeof NODE_SHAPES)[number];
   width: number;
   height: number;
