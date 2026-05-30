@@ -12,7 +12,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { slugify } from "@/lib/mock-projects";
 
 interface CreateProjectDialogProps {
   open: boolean;
@@ -20,6 +19,7 @@ interface CreateProjectDialogProps {
   name: string;
   onNameChange: (name: string) => void;
   onSubmit: () => void;
+  roomIdPreview: string | null;
 }
 
 export function CreateProjectDialog({
@@ -28,9 +28,8 @@ export function CreateProjectDialog({
   name,
   onNameChange,
   onSubmit,
+  roomIdPreview,
 }: CreateProjectDialogProps) {
-  const slug = slugify(name);
-
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
@@ -60,9 +59,9 @@ export function CreateProjectDialog({
             onChange={(e) => onNameChange(e.target.value)}
             autoFocus
           />
-          {name.trim() && (
+          {name.trim() && roomIdPreview && (
             <p className="text-xs text-copy-muted">
-              Slug: <span className="text-copy-secondary">{slug}</span>
+              Room ID: <span className="text-copy-secondary">{roomIdPreview}</span>
             </p>
           )}
         </div>

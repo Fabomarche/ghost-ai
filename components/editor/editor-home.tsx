@@ -3,12 +3,11 @@
 import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useEditor } from "@/components/editor/editor-context";
 
-interface EditorHomeProps {
-  onNewProject: () => void;
-}
+export function EditorHome() {
+  const { onNewProject } = useEditor();
 
-export function EditorHome({ onNewProject }: EditorHomeProps) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4">
       <h1 className="text-lg font-medium text-copy-primary">

@@ -14,6 +14,7 @@ interface ProjectSidebarProps {
   onClose: () => void;
   projects: Project[];
   onNewProject: () => void;
+  onSelect: (project: Project) => void;
   onRename: (project: Project) => void;
   onDelete: (project: Project) => void;
 }
@@ -29,10 +30,12 @@ function EmptyProjectsPlaceholder() {
 
 function ProjectItem({
   project,
+  onSelect,
   onRename,
   onDelete,
 }: {
   project: Project;
+  onSelect: (project: Project) => void;
   onRename: (project: Project) => void;
   onDelete: (project: Project) => void;
 }) {
@@ -40,7 +43,13 @@ function ProjectItem({
 
   return (
     <div className="group relative flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-copy-secondary hover:bg-subtle hover:text-copy-primary">
-      <span className="min-w-0 flex-1 truncate">{project.name}</span>
+      <button
+        type="button"
+        className="min-w-0 flex-1 truncate text-left"
+        onClick={() => onSelect(project)}
+      >
+        {project.name}
+      </button>
       {project.isOwned && (
         <div className="relative">
           <Button
@@ -95,6 +104,7 @@ export function ProjectSidebar({
   onClose,
   projects,
   onNewProject,
+  onSelect,
   onRename,
   onDelete,
 }: ProjectSidebarProps) {
@@ -149,6 +159,7 @@ export function ProjectSidebar({
                     <ProjectItem
                       key={project.id}
                       project={project}
+                      onSelect={onSelect}
                       onRename={onRename}
                       onDelete={onDelete}
                     />
@@ -165,6 +176,7 @@ export function ProjectSidebar({
                     <ProjectItem
                       key={project.id}
                       project={project}
+                      onSelect={onSelect}
                       onRename={onRename}
                       onDelete={onDelete}
                     />

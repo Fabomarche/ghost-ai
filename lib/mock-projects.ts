@@ -1,3 +1,5 @@
+export { slugify } from "@/lib/slug";
+
 import type { Project } from "@/types/projects";
 
 export const mockProjects: Project[] = [
@@ -23,10 +25,3 @@ export const mockProjects: Project[] = [
     isOwned: false,
   },
 ];
-
-export function slugify(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
