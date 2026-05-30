@@ -4,6 +4,8 @@ export interface NodeData extends Record<string, unknown> {
   label: string;
   color: string;
   shape: (typeof NODE_SHAPES)[number];
+  width: number;
+  height: number;
 }
 
 export interface EdgeData extends Record<string, unknown> {
@@ -43,4 +45,16 @@ export const SHAPE_DEFAULT_SIZES: Record<
   pill: { width: 180, height: 90 },
   cylinder: { width: 150, height: 180 },
   hexagon: { width: 160, height: 140 },
+};
+
+export const MIN_NODE_SIZES: Record<
+  (typeof NODE_SHAPES)[number],
+  { width: number; height: number }
+> = {
+  rectangle: { width: 100, height: 50 },
+  diamond: { width: 80, height: 80 },
+  circle: { width: 60, height: 60 },
+  pill: { width: 100, height: 50 },
+  cylinder: { width: 80, height: 100 },
+  hexagon: { width: 100, height: 80 },
 };

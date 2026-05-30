@@ -24,7 +24,8 @@ import "@liveblocks/react-flow/styles.css";
 import { CanvasNodeRenderer } from "@/components/editor/canvas-node";
 import { ShapePanel } from "@/components/editor/shape-panel";
 import { ShapeDragPreview } from "@/components/editor/shape-drag-preview";
-import { NODE_COLORS } from "@/types/canvas";
+import { CanvasActionsContext } from "@/components/editor/canvas-actions";
+import { NODE_COLORS, SHAPE_DEFAULT_SIZES } from "@/types/canvas";
 
 const nodeTypes = {
   canvasNode: CanvasNodeRenderer,
@@ -129,6 +130,7 @@ function FlowCanvas() {
       });
 
       const id = `${shape}-${Date.now()}-${nodeCounter++}`;
+      const defaults = SHAPE_DEFAULT_SIZES[shape as keyof typeof SHAPE_DEFAULT_SIZES];
 
       onNodesChange([
         {
@@ -141,12 +143,30 @@ function FlowCanvas() {
               label: "",
               color: NODE_COLORS[0].fill,
               shape,
+              width: defaults.width,
+              height: defaults.height,
             },
           } as any,
         },
       ]);
     },
     [screenToFlowPosition, onNodesChange],
+  );
+
+  const handleNodeDataChange = useCallback(
+    (id: string, data: Record<string, unknown>) => {
+      const node = nodes.find((n) => n.id === id);
+      if (node) {
+        onNodesChange([
+          {
+            type: "replace",
+            id,
+            item: { ...node, data: { ...node.data, ...data } },
+          },
+        ] as any);
+      }
+    },
+    [nodes, onNodesChange],
   );
 
   if (isLoading) return <CanvasLoading />;
@@ -157,25 +177,27 @@ function FlowCanvas() {
       onDragOver={handleCanvasDragOver}
       onDrop={handleDrop}
     >
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onDelete={onDelete}
-        connectionMode={ConnectionMode.Loose}
-        fitView
-        nodeTypes={nodeTypes}
-      >
-        <MiniMap />
-        <Background
-          variant={BackgroundVariant.Dots}
-          color="var(--border-subtle)"
-          gap={20}
-          size={1}
-        />
-      </ReactFlow>
+      <CanvasActionsContext.Provider value={{ onNodeDataChange: handleNodeDataChange }}>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange as any}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onDelete={onDelete}
+          connectionMode={ConnectionMode.Loose}
+          fitView
+          nodeTypes={nodeTypes}
+        >
+          <MiniMap />
+          <Background
+            variant={BackgroundVariant.Dots}
+            color="var(--border-subtle)"
+            gap={20}
+            size={1}
+          />
+        </ReactFlow>
+      </CanvasActionsContext.Provider>
       <ShapePanel onDragStart={handleShapeDragStart} />
       {draggingShape && (
         <ShapeDragPreview
