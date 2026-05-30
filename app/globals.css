@@ -168,3 +168,9 @@
     @apply font-sans;
   }
 }
+
+input,
+textarea,
+select {
+  color: var(--text-primary);
+}

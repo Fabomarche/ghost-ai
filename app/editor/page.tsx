@@ -1,7 +1,9 @@
+"use client";
+
+import { useEditor } from "@/components/editor/editor-context";
+import { EditorHome } from "@/components/editor/editor-home";
+
 export default function EditorPage() {
-  return (
-    <div className="flex flex-1 items-center justify-center">
-      <p className="text-copy-muted">Editor coming soon.</p>
-    </div>
-  );
+  const { onNewProject } = useEditor();
+  return <EditorHome onNewProject={onNewProject} />;
 }
