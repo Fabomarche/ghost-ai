@@ -14,6 +14,7 @@ import { ShareDialog } from "@/components/editor/share-dialog";
 import { StarterTemplatesModal } from "@/components/editor/starter-templates-modal";
 import { EditorProvider } from "@/components/editor/editor-context";
 import { LiveblocksCanvas } from "@/components/editor/liveblocks-canvas";
+import { AiSidebar } from "@/components/editor/ai-sidebar";
 import { useProjectActions } from "@/hooks/use-project-actions";
 import type { Project } from "@/types/projects";
 import type { CanvasTemplate } from "@/components/editor/starter-templates";
@@ -21,58 +22,6 @@ import type { CanvasTemplate } from "@/components/editor/starter-templates";
 interface WorkspaceShellProps {
   project: { id: string; roomId: string; name: string; isOwner: boolean };
   projects: Project[];
-}
-
-function AiSidebar() {
-  return (
-    <aside className="flex w-80 shrink-0 flex-col border-l border-surface-border bg-surface">
-      <div className="flex items-center justify-between border-b border-surface-border px-4 py-3">
-        <div>
-          <h2 className="text-sm font-medium text-copy-primary">AI Copilot</h2>
-          <p className="text-xs text-copy-faint">Placeholder panel</p>
-        </div>
-        <Sparkles className="h-4 w-4 text-brand" />
-      </div>
-
-      <div className="flex flex-1 flex-col gap-3 p-4">
-        <div className="rounded-2xl border border-surface-border bg-elevated p-4">
-          <div className="flex items-start gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-dim">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                className="h-4 w-4 text-brand"
-                strokeWidth={1.5}
-                stroke="currentColor"
-              >
-                <path d="M9.75 3.5h4.5M12 3.5v1.5M7.5 8h9l.75 10.5a2 2 0 01-2 2h-6.5a2 2 0 01-2-2L7.5 8z" />
-                <path d="M10 12h4M10 15h4" />
-              </svg>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-copy-primary">
-                Chat surface pending
-              </h3>
-              <p className="mt-1 text-xs leading-relaxed text-copy-muted">
-                The toggle is wired. Messaging and generation are intentionally
-                out of scope here.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="border-t border-surface-border p-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.15em] text-copy-faint">
-          Future Hooks
-        </p>
-        <p className="mt-2 text-xs leading-relaxed text-copy-muted">
-          Prompt composer, run status, and architecture guidance will attach to
-          this sidebar.
-        </p>
-      </div>
-    </aside>
-  );
 }
 
 export function WorkspaceShell({ project, projects }: WorkspaceShellProps) {
@@ -184,9 +133,12 @@ export function WorkspaceShell({ project, projects }: WorkspaceShellProps) {
         onDelete={openDelete}
       />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="relative flex flex-1 overflow-hidden">
         <LiveblocksCanvas roomId={project.roomId} currentUserId={userId ?? ""} templateToImport={templateToImport} onTemplateImported={() => setTemplateToImport(null)} />
-        {aiSidebarOpen && <AiSidebar />}
+        <AiSidebar
+          isOpen={aiSidebarOpen}
+          onClose={() => setAiSidebarOpen(false)}
+        />
       </div>
 
       <EditorProvider onNewProject={openCreate}>
