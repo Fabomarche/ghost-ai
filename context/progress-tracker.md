@@ -4,7 +4,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Foundation — auth (done)
+- AI backend — design agent API (done)
 
 ## Current Goal
 
@@ -33,6 +33,7 @@ Update this file whenever the current phase, active feature, or implementation s
 - `20-ai-sidebar-shell` — Floating AI sidebar extracted to `components/editor/ai-sidebar.tsx`. Open/close state controlled by `WorkspaceShell` via `isOpen`/`onClose` props; slide-in animation from the right preserved (`translate-x`, opacity, pointer-events). Header with Bot icon, "AI Workspace" title, "Collaborate with Ghost AI" subtitle, and close button. shadcn `Tabs` with AI Architect and Specs panels. AI Architect tab: scrollable chat area, empty state with bot icon and three starter prompt chips (`bg-subtle`, `text-ai-text`), user message bubbles (`bg-accent-dim border-brand/50 border-2`), local send-only input with auto-resizing textarea (72px–160px), Enter/Shift+Enter handling, and `bg-brand text-white` send button. Specs tab: `Generate Spec` button and static demo spec card (`bg-elevated`, file icon, snippet preview, disabled download). Inline placeholder sidebar removed from `workspace-shell.tsx`. `npm run build` passes.
 - `21-canvas-autosave` — Canvas persistence via Vercel Blob and Prisma `canvasJsonPath`. `@vercel/blob` installed. `PUT`/`GET /api/projects/[projectId]/canvas` routes upload canvas JSON to `canvas/{projectId}.json`, store blob URL on the project record, and return saved state (owner/collaborator access via `getProjectByIdForUser`). `hooks/use-canvas-autosave.ts` debounces saves (1.5s), tracks `idle`/`saving`/`saved`/`error` status, loads saved canvas when the Liveblocks room is empty, and skips load when nodes or edges already exist. `LiveblocksCanvas` wires the hook; `WorkspaceShell` navbar Save button shows status labels and triggers manual save. `npm run build` passes.
 - `22-trigger-setup` — Trigger.dev v4.4.6 integrated. `@trigger.dev/sdk` and `@trigger.dev/build` installed. `trigger.config.ts` configured with Prisma 7 engine-only build extension. `trigger/example.ts` sample task added. `trigger:dev` and `trigger:deploy` npm scripts added. Requires `TRIGGER_PROJECT_REF` and `TRIGGER_SECRET_KEY` env vars.
+- `22-design-agent-api` — Design generation backend wiring (no AI logic). `TaskRun` Prisma model (`runId` PK, `projectId`, `userId`, `createdAt`, compound index on `userId` + `projectId`). `POST /api/ai/design` validates prompt/roomId/projectId, checks project access, triggers `design-agent` task, persists `TaskRun`, returns `runId`. `POST /api/ai/design/token` verifies `TaskRun` ownership and returns a run-scoped Trigger.dev public token. `trigger/design-agent.ts` minimal task logs/echoes `prompt` and `roomId`. `npm run build` passes.
 
 ## In Progress
 
@@ -40,7 +41,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Next Up
 
-- None.
+- Wire AI sidebar to design API routes and realtime run subscription.
 
 ## Open Questions
 
