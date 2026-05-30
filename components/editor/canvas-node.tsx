@@ -18,17 +18,13 @@ function RectangleShape({ color, selected }: ShapeProps) {
         backgroundColor: color,
         borderColor: selected ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.1)",
       }}
-    >
-      <Handle type="target" position={Position.Top} className="!bg-brand" />
-      <Handle type="source" position={Position.Bottom} className="!bg-brand" />
-    </div>
+    />
   );
 }
 
 function DiamondShape({ color, selected }: ShapeProps) {
   return (
     <div className="relative h-full w-full">
-      <Handle type="target" position={Position.Top} className="!bg-brand" />
       <svg
         className="absolute inset-0 h-full w-full"
         viewBox="0 0 100 100"
@@ -42,7 +38,6 @@ function DiamondShape({ color, selected }: ShapeProps) {
           vectorEffect="non-scaling-stroke"
         />
       </svg>
-      <Handle type="source" position={Position.Bottom} className="!bg-brand" />
     </div>
   );
 }
@@ -55,10 +50,7 @@ function CircleShape({ color, selected }: ShapeProps) {
         backgroundColor: color,
         borderColor: selected ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.1)",
       }}
-    >
-      <Handle type="target" position={Position.Top} className="!bg-brand" />
-      <Handle type="source" position={Position.Bottom} className="!bg-brand" />
-    </div>
+    />
   );
 }
 
@@ -70,10 +62,7 @@ function PillShape({ color, selected }: ShapeProps) {
         backgroundColor: color,
         borderColor: selected ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.1)",
       }}
-    >
-      <Handle type="target" position={Position.Top} className="!bg-brand" />
-      <Handle type="source" position={Position.Bottom} className="!bg-brand" />
-    </div>
+    />
   );
 }
 
@@ -82,7 +71,6 @@ function CylinderShape({ color, selected }: ShapeProps) {
 
   return (
     <div className="relative flex h-full w-full flex-col">
-      <Handle type="target" position={Position.Top} className="!bg-brand" />
       <svg
         className="h-5 w-full"
         viewBox="0 0 120 20"
@@ -122,7 +110,6 @@ function CylinderShape({ color, selected }: ShapeProps) {
           vectorEffect="non-scaling-stroke"
         />
       </svg>
-      <Handle type="source" position={Position.Bottom} className="!bg-brand" />
     </div>
   );
 }
@@ -130,7 +117,6 @@ function CylinderShape({ color, selected }: ShapeProps) {
 function HexagonShape({ color, selected }: ShapeProps) {
   return (
     <div className="relative h-full w-full">
-      <Handle type="target" position={Position.Top} className="!bg-brand" />
       <svg
         className="absolute inset-0 h-full w-full"
         viewBox="0 0 100 100"
@@ -144,14 +130,13 @@ function HexagonShape({ color, selected }: ShapeProps) {
           vectorEffect="non-scaling-stroke"
         />
       </svg>
-      <Handle type="source" position={Position.Bottom} className="!bg-brand" />
     </div>
   );
 }
 
-const HANDLE_STYLE = "absolute w-2 h-2 rounded-sm border border-white/20 bg-surface z-50 pointer-events-auto nodrag nopan";
-
 type HandleDir = "n" | "s" | "e" | "w" | "nw" | "ne" | "sw" | "se";
+
+const RESIZE_HANDLE_STYLE = "absolute w-2 h-2 rounded-sm border border-white/20 bg-surface z-50 pointer-events-auto nodrag nopan";
 
 interface ResizeState {
   nodeId: string;
@@ -298,6 +283,11 @@ export function CanvasNodeRenderer({ id, data, selected }: NodeProps<CanvasNode>
     >
       {shapeContent}
 
+      <Handle id="top" type="target" position={Position.Top} />
+      <Handle id="right" type="source" position={Position.Right} />
+      <Handle id="bottom" type="source" position={Position.Bottom} />
+      <Handle id="left" type="target" position={Position.Left} />
+
       {editing ? (
         <textarea
           ref={taRef}
@@ -332,42 +322,42 @@ export function CanvasNodeRenderer({ id, data, selected }: NodeProps<CanvasNode>
       {selected && (
         <>
           <div
-            className={`${HANDLE_STYLE} -top-1 left-1/2 -translate-x-1/2 cursor-n-resize`}
+            className={`${RESIZE_HANDLE_STYLE} -top-1 left-1/2 -translate-x-1/2 cursor-n-resize`}
             onMouseDown={handleResizeStart("n")}
             onPointerDown={(e) => e.stopPropagation()}
           />
           <div
-            className={`${HANDLE_STYLE} -bottom-1 left-1/2 -translate-x-1/2 cursor-s-resize`}
+            className={`${RESIZE_HANDLE_STYLE} -bottom-1 left-1/2 -translate-x-1/2 cursor-s-resize`}
             onMouseDown={handleResizeStart("s")}
             onPointerDown={(e) => e.stopPropagation()}
           />
           <div
-            className={`${HANDLE_STYLE} top-1/2 -left-1 -translate-y-1/2 cursor-w-resize`}
+            className={`${RESIZE_HANDLE_STYLE} top-1/2 -left-1 -translate-y-1/2 cursor-w-resize`}
             onMouseDown={handleResizeStart("w")}
             onPointerDown={(e) => e.stopPropagation()}
           />
           <div
-            className={`${HANDLE_STYLE} top-1/2 -right-1 -translate-y-1/2 cursor-e-resize`}
+            className={`${RESIZE_HANDLE_STYLE} top-1/2 -right-1 -translate-y-1/2 cursor-e-resize`}
             onMouseDown={handleResizeStart("e")}
             onPointerDown={(e) => e.stopPropagation()}
           />
           <div
-            className={`${HANDLE_STYLE} -top-1 -left-1 cursor-nw-resize`}
+            className={`${RESIZE_HANDLE_STYLE} -top-1 -left-1 cursor-nw-resize`}
             onMouseDown={handleResizeStart("nw")}
             onPointerDown={(e) => e.stopPropagation()}
           />
           <div
-            className={`${HANDLE_STYLE} -top-1 -right-1 cursor-ne-resize`}
+            className={`${RESIZE_HANDLE_STYLE} -top-1 -right-1 cursor-ne-resize`}
             onMouseDown={handleResizeStart("ne")}
             onPointerDown={(e) => e.stopPropagation()}
           />
           <div
-            className={`${HANDLE_STYLE} -bottom-1 -left-1 cursor-sw-resize`}
+            className={`${RESIZE_HANDLE_STYLE} -bottom-1 -left-1 cursor-sw-resize`}
             onMouseDown={handleResizeStart("sw")}
             onPointerDown={(e) => e.stopPropagation()}
           />
           <div
-            className={`${HANDLE_STYLE} -bottom-1 -right-1 cursor-se-resize`}
+            className={`${RESIZE_HANDLE_STYLE} -bottom-1 -right-1 cursor-se-resize`}
             onMouseDown={handleResizeStart("se")}
             onPointerDown={(e) => e.stopPropagation()}
           />

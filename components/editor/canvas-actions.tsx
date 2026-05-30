@@ -4,6 +4,7 @@ import { createContext, useContext } from "react";
 
 interface CanvasActions {
   onNodeDataChange: (id: string, data: Record<string, unknown>) => void;
+  onEdgeDataChange: (id: string, data: Record<string, unknown>) => void;
 }
 
 export const CanvasActionsContext = createContext<CanvasActions | null>(null);

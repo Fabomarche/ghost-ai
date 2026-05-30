@@ -4,12 +4,13 @@ import {
   ReactFlow,
   ReactFlowProvider,
   Background,
-  MiniMap,
   BackgroundVariant,
   ConnectionMode,
   useReactFlow,
+  MarkerType,
 } from "@xyflow/react";
 import { useLiveblocksFlow } from "@liveblocks/react-flow";
+import { useUndo, useRedo } from "@liveblocks/react";
 import {
   LiveblocksProvider,
   RoomProvider,
@@ -22,14 +23,36 @@ import "@liveblocks/react-ui/styles.css";
 import "@liveblocks/react-flow/styles.css";
 
 import { CanvasNodeRenderer } from "@/components/editor/canvas-node";
+import { CanvasEdge } from "@/components/editor/canvas-edge";
 import { ShapePanel } from "@/components/editor/shape-panel";
 import { ShapeDragPreview } from "@/components/editor/shape-drag-preview";
 import { CanvasActionsContext } from "@/components/editor/canvas-actions";
 import { NodeColorToolbar } from "@/components/editor/node-color-toolbar";
+import { CanvasControlBar } from "@/components/editor/canvas-control-bar";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { NODE_COLORS, SHAPE_DEFAULT_SIZES } from "@/types/canvas";
 
 const nodeTypes = {
   canvasNode: CanvasNodeRenderer,
+};
+
+const edgeTypes = {
+  canvasEdge: CanvasEdge,
+};
+
+const defaultEdgeOptions = {
+  type: "canvasEdge",
+  markerEnd: {
+    type: MarkerType.ArrowClosed,
+    color: "var(--text-muted)",
+    width: 16,
+    height: 16,
+  },
+  style: {
+    stroke: "var(--text-muted)",
+    strokeWidth: 1.5,
+    strokeLinecap: "round" as const,
+  },
 };
 
 let nodeCounter = 0;
@@ -74,7 +97,7 @@ function CanvasLoading() {
 }
 
 function FlowCanvas() {
-  const { screenToFlowPosition } = useReactFlow();
+  const reactFlow = useReactFlow();
   const {
     nodes,
     edges,
@@ -84,6 +107,11 @@ function FlowCanvas() {
     onDelete,
     isLoading,
   } = useLiveblocksFlow({ suspense: true });
+
+  const undo = useUndo();
+  const redo = useRedo();
+
+  useKeyboardShortcuts({ reactFlow, undo, redo });
 
   const [draggingShape, setDraggingShape] = useState<string | null>(null);
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
@@ -125,7 +153,7 @@ function FlowCanvas() {
       if (!raw) return;
 
       const { shape } = JSON.parse(raw);
-      const position = screenToFlowPosition({
+      const position = reactFlow.screenToFlowPosition({
         x: e.clientX,
         y: e.clientY,
       });
@@ -152,7 +180,7 @@ function FlowCanvas() {
         },
       ]);
     },
-    [screenToFlowPosition, onNodesChange],
+    [reactFlow, onNodesChange],
   );
 
   const handleNodeDataChange = useCallback(
@@ -171,12 +199,28 @@ function FlowCanvas() {
     [nodes, onNodesChange],
   );
 
+  const handleEdgeDataChange = useCallback(
+    (id: string, data: Record<string, unknown>) => {
+      const edge = edges.find((e) => e.id === id);
+      if (edge) {
+        onEdgesChange([
+          {
+            type: "replace",
+            id,
+            item: { ...edge, data: { ...edge.data, ...data } },
+          },
+        ] as any);
+      }
+    },
+    [edges, onEdgesChange],
+  );
+
   if (isLoading) return <CanvasLoading />;
 
   const selectedNodeIds = nodes.filter((n) => n.selected).map((n) => n.id);
 
   return (
-    <CanvasActionsContext.Provider value={{ onNodeDataChange: handleNodeDataChange }}>
+    <CanvasActionsContext.Provider value={{ onNodeDataChange: handleNodeDataChange, onEdgeDataChange: handleEdgeDataChange }}>
       <div
         className="relative flex flex-1"
         onDragOver={handleCanvasDragOver}
@@ -192,8 +236,9 @@ function FlowCanvas() {
           connectionMode={ConnectionMode.Loose}
           fitView
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
+          defaultEdgeOptions={defaultEdgeOptions}
         >
-          <MiniMap />
           <Background
             variant={BackgroundVariant.Dots}
             color="var(--border-subtle)"
@@ -202,6 +247,7 @@ function FlowCanvas() {
           />
         </ReactFlow>
         <ShapePanel onDragStart={handleShapeDragStart} />
+        <CanvasControlBar />
         {draggingShape && (
           <ShapeDragPreview
             shape={draggingShape}
