@@ -35,3 +35,27 @@ export async function getProjectForUser(roomId: string) {
     isOwner,
   };
 }
+
+export async function getProjectByIdForUser(projectId: string) {
+  const { userId } = await auth();
+  if (!userId) return null;
+
+  const user = await currentUser();
+  const email = user?.emailAddresses[0]?.emailAddress?.toLowerCase();
+
+  const project = await prisma.project.findUnique({
+    where: { id: projectId },
+    include: { collaborators: true },
+  });
+
+  if (!project) return null;
+
+  const isOwner = project.ownerId === userId;
+  const isCollaborator = email
+    ? project.collaborators.some((c) => c.email === email)
+    : false;
+
+  if (!isOwner && !isCollaborator) return null;
+
+  return { ...project, isOwner };
+}

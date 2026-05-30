@@ -32,6 +32,10 @@ import { CanvasControlBar } from "@/components/editor/canvas-control-bar";
 import { PresenceAvatars } from "@/components/editor/presence-avatars";
 import { LiveCursors } from "@/components/editor/live-cursors";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import {
+  useCanvasAutosave,
+  type CanvasSaveStatus,
+} from "@/hooks/use-canvas-autosave";
 import { NODE_COLORS, SHAPE_DEFAULT_SIZES } from "@/types/canvas";
 import type { CanvasTemplate } from "@/components/editor/starter-templates";
 
@@ -100,12 +104,22 @@ function CanvasLoading() {
 }
 
 interface FlowCanvasProps {
+  projectId: string;
   templateToImport: CanvasTemplate | null;
   onTemplateImported: () => void;
   currentUserId: string;
+  onSaveStatusChange?: (status: CanvasSaveStatus) => void;
+  onSaveReady?: (save: () => Promise<void>) => void;
 }
 
-function FlowCanvas({ templateToImport, onTemplateImported, currentUserId }: FlowCanvasProps) {
+function FlowCanvas({
+  projectId,
+  templateToImport,
+  onTemplateImported,
+  currentUserId,
+  onSaveStatusChange,
+  onSaveReady,
+}: FlowCanvasProps) {
   const reactFlow = useReactFlow();
   const {
     nodes,
@@ -119,6 +133,23 @@ function FlowCanvas({ templateToImport, onTemplateImported, currentUserId }: Flo
 
   const undo = useUndo();
   const redo = useRedo();
+
+  const { status: saveStatus, save } = useCanvasAutosave({
+    projectId,
+    nodes: nodes as any,
+    edges: edges as any,
+    isLoading,
+    onNodesChange: onNodesChange as (changes: unknown[]) => void,
+    onEdgesChange: onEdgesChange as (changes: unknown[]) => void,
+  });
+
+  useEffect(() => {
+    onSaveStatusChange?.(saveStatus);
+  }, [saveStatus, onSaveStatusChange]);
+
+  useEffect(() => {
+    onSaveReady?.(save);
+  }, [save, onSaveReady]);
 
   useKeyboardShortcuts({ reactFlow, undo, redo });
 
@@ -323,22 +354,47 @@ function FlowCanvas({ templateToImport, onTemplateImported, currentUserId }: Flo
   );
 }
 
-function Flow({ templateToImport, onTemplateImported, currentUserId }: FlowCanvasProps) {
+function Flow({
+  projectId,
+  templateToImport,
+  onTemplateImported,
+  currentUserId,
+  onSaveStatusChange,
+  onSaveReady,
+}: FlowCanvasProps) {
   return (
     <ReactFlowProvider>
-      <FlowCanvas templateToImport={templateToImport} onTemplateImported={onTemplateImported} currentUserId={currentUserId} />
+      <FlowCanvas
+        projectId={projectId}
+        templateToImport={templateToImport}
+        onTemplateImported={onTemplateImported}
+        currentUserId={currentUserId}
+        onSaveStatusChange={onSaveStatusChange}
+        onSaveReady={onSaveReady}
+      />
     </ReactFlowProvider>
   );
 }
 
 interface LiveblocksCanvasProps {
+  projectId: string;
   roomId: string;
   currentUserId: string;
   templateToImport?: CanvasTemplate | null;
   onTemplateImported?: () => void;
+  onSaveStatusChange?: (status: CanvasSaveStatus) => void;
+  onSaveReady?: (save: () => Promise<void>) => void;
 }
 
-export function LiveblocksCanvas({ roomId, currentUserId, templateToImport = null, onTemplateImported = () => {} }: LiveblocksCanvasProps) {
+export function LiveblocksCanvas({
+  projectId,
+  roomId,
+  currentUserId,
+  templateToImport = null,
+  onTemplateImported = () => {},
+  onSaveStatusChange,
+  onSaveReady,
+}: LiveblocksCanvasProps) {
   return (
     <LiveblocksErrorBoundary fallback={<CanvasErrorFallback />}>
       <LiveblocksProvider
@@ -353,7 +409,14 @@ export function LiveblocksCanvas({ roomId, currentUserId, templateToImport = nul
       >
         <RoomProvider id={roomId} initialPresence={{ cursor: null, thinking: false }}>
           <ClientSideSuspense fallback={<CanvasLoading />}>
-            <Flow templateToImport={templateToImport} onTemplateImported={onTemplateImported} currentUserId={currentUserId} />
+            <Flow
+              projectId={projectId}
+              templateToImport={templateToImport}
+              onTemplateImported={onTemplateImported}
+              currentUserId={currentUserId}
+              onSaveStatusChange={onSaveStatusChange}
+              onSaveReady={onSaveReady}
+            />
           </ClientSideSuspense>
         </RoomProvider>
       </LiveblocksProvider>

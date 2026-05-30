@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { UserButton, useAuth } from "@clerk/nextjs";
 import { Link2, Sparkles, LayoutTemplate, PanelLeftOpen, PanelLeftClose } from "lucide-react";
@@ -16,8 +16,22 @@ import { EditorProvider } from "@/components/editor/editor-context";
 import { LiveblocksCanvas } from "@/components/editor/liveblocks-canvas";
 import { AiSidebar } from "@/components/editor/ai-sidebar";
 import { useProjectActions } from "@/hooks/use-project-actions";
+import type { CanvasSaveStatus } from "@/hooks/use-canvas-autosave";
 import type { Project } from "@/types/projects";
 import type { CanvasTemplate } from "@/components/editor/starter-templates";
+
+function getSaveLabel(status: CanvasSaveStatus) {
+  switch (status) {
+    case "saving":
+      return "Saving...";
+    case "saved":
+      return "Saved";
+    case "error":
+      return "Error";
+    default:
+      return "Save";
+  }
+}
 
 interface WorkspaceShellProps {
   project: { id: string; roomId: string; name: string; isOwner: boolean };
@@ -32,6 +46,8 @@ export function WorkspaceShell({ project, projects }: WorkspaceShellProps) {
   const [shareOpen, setShareOpen] = useState(false);
   const [templatesOpen, setTemplatesOpen] = useState(false);
   const [templateToImport, setTemplateToImport] = useState<CanvasTemplate | null>(null);
+  const [saveStatus, setSaveStatus] = useState<CanvasSaveStatus>("idle");
+  const saveCanvasRef = useRef<(() => Promise<void>) | null>(null);
 
   const {
     dialog,
@@ -90,6 +106,18 @@ export function WorkspaceShell({ project, projects }: WorkspaceShellProps) {
             type="button"
             variant="ghost"
             size="sm"
+            aria-label="Save canvas"
+            disabled={saveStatus === "saving"}
+            onClick={() => {
+              void saveCanvasRef.current?.();
+            }}
+          >
+            {getSaveLabel(saveStatus)}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
             aria-label="Share project"
             onClick={() => setShareOpen(true)}
           >
@@ -134,7 +162,17 @@ export function WorkspaceShell({ project, projects }: WorkspaceShellProps) {
       />
 
       <div className="relative flex flex-1 overflow-hidden">
-        <LiveblocksCanvas roomId={project.roomId} currentUserId={userId ?? ""} templateToImport={templateToImport} onTemplateImported={() => setTemplateToImport(null)} />
+        <LiveblocksCanvas
+          projectId={project.id}
+          roomId={project.roomId}
+          currentUserId={userId ?? ""}
+          templateToImport={templateToImport}
+          onTemplateImported={() => setTemplateToImport(null)}
+          onSaveStatusChange={setSaveStatus}
+          onSaveReady={(save) => {
+            saveCanvasRef.current = save;
+          }}
+        />
         <AiSidebar
           isOpen={aiSidebarOpen}
           onClose={() => setAiSidebarOpen(false)}
