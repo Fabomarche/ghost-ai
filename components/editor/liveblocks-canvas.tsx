@@ -10,7 +10,7 @@ import {
   MarkerType,
 } from "@xyflow/react";
 import { useLiveblocksFlow } from "@liveblocks/react-flow";
-import { useUndo, useRedo } from "@liveblocks/react";
+import { useUndo, useRedo, useUpdateMyPresence } from "@liveblocks/react";
 import {
   LiveblocksProvider,
   RoomProvider,
@@ -29,6 +29,8 @@ import { ShapeDragPreview } from "@/components/editor/shape-drag-preview";
 import { CanvasActionsContext } from "@/components/editor/canvas-actions";
 import { NodeColorToolbar } from "@/components/editor/node-color-toolbar";
 import { CanvasControlBar } from "@/components/editor/canvas-control-bar";
+import { PresenceAvatars } from "@/components/editor/presence-avatars";
+import { LiveCursors } from "@/components/editor/live-cursors";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { NODE_COLORS, SHAPE_DEFAULT_SIZES } from "@/types/canvas";
 import type { CanvasTemplate } from "@/components/editor/starter-templates";
@@ -100,9 +102,10 @@ function CanvasLoading() {
 interface FlowCanvasProps {
   templateToImport: CanvasTemplate | null;
   onTemplateImported: () => void;
+  currentUserId: string;
 }
 
-function FlowCanvas({ templateToImport, onTemplateImported }: FlowCanvasProps) {
+function FlowCanvas({ templateToImport, onTemplateImported, currentUserId }: FlowCanvasProps) {
   const reactFlow = useReactFlow();
   const {
     nodes,
@@ -118,6 +121,19 @@ function FlowCanvas({ templateToImport, onTemplateImported }: FlowCanvasProps) {
   const redo = useRedo();
 
   useKeyboardShortcuts({ reactFlow, undo, redo });
+
+  const updateMyPresence = useUpdateMyPresence();
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      updateMyPresence({ cursor: { x: e.clientX, y: e.clientY } });
+    },
+    [updateMyPresence],
+  );
+
+  const handleMouseLeave = useCallback(() => {
+    updateMyPresence({ cursor: null });
+  }, [updateMyPresence]);
 
   useEffect(() => {
     if (!templateToImport) return;
@@ -273,6 +289,8 @@ function FlowCanvas({ templateToImport, onTemplateImported }: FlowCanvasProps) {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onDelete={onDelete}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
           connectionMode={ConnectionMode.Loose}
           fitView
           nodeTypes={nodeTypes}
@@ -286,6 +304,10 @@ function FlowCanvas({ templateToImport, onTemplateImported }: FlowCanvasProps) {
             size={1}
           />
         </ReactFlow>
+        <LiveCursors currentUserId={currentUserId} />
+        <div className="absolute right-3 top-3 z-40">
+          <PresenceAvatars currentUserId={currentUserId} />
+        </div>
         <ShapePanel onDragStart={handleShapeDragStart} />
         <CanvasControlBar />
         {draggingShape && (
@@ -301,21 +323,22 @@ function FlowCanvas({ templateToImport, onTemplateImported }: FlowCanvasProps) {
   );
 }
 
-function Flow({ templateToImport, onTemplateImported }: FlowCanvasProps) {
+function Flow({ templateToImport, onTemplateImported, currentUserId }: FlowCanvasProps) {
   return (
     <ReactFlowProvider>
-      <FlowCanvas templateToImport={templateToImport} onTemplateImported={onTemplateImported} />
+      <FlowCanvas templateToImport={templateToImport} onTemplateImported={onTemplateImported} currentUserId={currentUserId} />
     </ReactFlowProvider>
   );
 }
 
 interface LiveblocksCanvasProps {
   roomId: string;
+  currentUserId: string;
   templateToImport?: CanvasTemplate | null;
   onTemplateImported?: () => void;
 }
 
-export function LiveblocksCanvas({ roomId, templateToImport = null, onTemplateImported = () => {} }: LiveblocksCanvasProps) {
+export function LiveblocksCanvas({ roomId, currentUserId, templateToImport = null, onTemplateImported = () => {} }: LiveblocksCanvasProps) {
   return (
     <LiveblocksErrorBoundary fallback={<CanvasErrorFallback />}>
       <LiveblocksProvider
@@ -328,9 +351,9 @@ export function LiveblocksCanvas({ roomId, templateToImport = null, onTemplateIm
           return await response.json();
         }}
       >
-        <RoomProvider id={roomId} initialPresence={{ cursor: null, isThinking: false }}>
+        <RoomProvider id={roomId} initialPresence={{ cursor: null, thinking: false }}>
           <ClientSideSuspense fallback={<CanvasLoading />}>
-            <Flow templateToImport={templateToImport} onTemplateImported={onTemplateImported} />
+            <Flow templateToImport={templateToImport} onTemplateImported={onTemplateImported} currentUserId={currentUserId} />
           </ClientSideSuspense>
         </RoomProvider>
       </LiveblocksProvider>

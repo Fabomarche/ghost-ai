@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { UserButton } from "@clerk/nextjs";
+import { UserButton, useAuth } from "@clerk/nextjs";
 import { Link2, Sparkles, LayoutTemplate, PanelLeftOpen, PanelLeftClose } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -77,6 +77,7 @@ function AiSidebar() {
 
 export function WorkspaceShell({ project, projects }: WorkspaceShellProps) {
   const router = useRouter();
+  const { userId } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [aiSidebarOpen, setAiSidebarOpen] = useState(true);
   const [shareOpen, setShareOpen] = useState(false);
@@ -184,7 +185,7 @@ export function WorkspaceShell({ project, projects }: WorkspaceShellProps) {
       />
 
       <div className="flex flex-1 overflow-hidden">
-        <LiveblocksCanvas roomId={project.roomId} templateToImport={templateToImport} onTemplateImported={() => setTemplateToImport(null)} />
+        <LiveblocksCanvas roomId={project.roomId} currentUserId={userId ?? ""} templateToImport={templateToImport} onTemplateImported={() => setTemplateToImport(null)} />
         {aiSidebarOpen && <AiSidebar />}
       </div>
 
