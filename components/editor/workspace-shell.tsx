@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
-import { Link2, Sparkles, PanelLeftOpen, PanelLeftClose } from "lucide-react";
+import { Link2, Sparkles, LayoutTemplate, PanelLeftOpen, PanelLeftClose } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ProjectSidebar } from "@/components/editor/project-sidebar";
@@ -11,10 +11,12 @@ import { CreateProjectDialog } from "@/components/editor/create-project-dialog";
 import { RenameProjectDialog } from "@/components/editor/rename-project-dialog";
 import { DeleteProjectDialog } from "@/components/editor/delete-project-dialog";
 import { ShareDialog } from "@/components/editor/share-dialog";
+import { StarterTemplatesModal } from "@/components/editor/starter-templates-modal";
 import { EditorProvider } from "@/components/editor/editor-context";
 import { LiveblocksCanvas } from "@/components/editor/liveblocks-canvas";
 import { useProjectActions } from "@/hooks/use-project-actions";
 import type { Project } from "@/types/projects";
+import type { CanvasTemplate } from "@/components/editor/starter-templates";
 
 interface WorkspaceShellProps {
   project: { id: string; roomId: string; name: string; isOwner: boolean };
@@ -78,6 +80,8 @@ export function WorkspaceShell({ project, projects }: WorkspaceShellProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [aiSidebarOpen, setAiSidebarOpen] = useState(true);
   const [shareOpen, setShareOpen] = useState(false);
+  const [templatesOpen, setTemplatesOpen] = useState(false);
+  const [templateToImport, setTemplateToImport] = useState<CanvasTemplate | null>(null);
 
   const {
     dialog,
@@ -144,6 +148,16 @@ export function WorkspaceShell({ project, projects }: WorkspaceShellProps) {
           </Button>
           <Button
             type="button"
+            variant="ghost"
+            size="sm"
+            aria-label="Starter templates"
+            onClick={() => setTemplatesOpen(true)}
+          >
+            <LayoutTemplate className="h-4 w-4" />
+            Templates
+          </Button>
+          <Button
+            type="button"
             variant={aiSidebarOpen ? "default" : "ghost"}
             size="sm"
             aria-label="Toggle AI sidebar"
@@ -170,7 +184,7 @@ export function WorkspaceShell({ project, projects }: WorkspaceShellProps) {
       />
 
       <div className="flex flex-1 overflow-hidden">
-        <LiveblocksCanvas roomId={project.roomId} />
+        <LiveblocksCanvas roomId={project.roomId} templateToImport={templateToImport} onTemplateImported={() => setTemplateToImport(null)} />
         {aiSidebarOpen && <AiSidebar />}
       </div>
 
@@ -181,6 +195,14 @@ export function WorkspaceShell({ project, projects }: WorkspaceShellProps) {
           projectId={project.id}
           roomId={project.roomId}
           isOwner={project.isOwner}
+        />
+        <StarterTemplatesModal
+          open={templatesOpen}
+          onOpenChange={setTemplatesOpen}
+          onImport={(t) => {
+            setTemplateToImport(t);
+            setTemplatesOpen(false);
+          }}
         />
         <CreateProjectDialog
           open={dialog.type === "create"}

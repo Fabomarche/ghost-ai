@@ -31,6 +31,7 @@ import { NodeColorToolbar } from "@/components/editor/node-color-toolbar";
 import { CanvasControlBar } from "@/components/editor/canvas-control-bar";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { NODE_COLORS, SHAPE_DEFAULT_SIZES } from "@/types/canvas";
+import type { CanvasTemplate } from "@/components/editor/starter-templates";
 
 const nodeTypes = {
   canvasNode: CanvasNodeRenderer,
@@ -96,7 +97,12 @@ function CanvasLoading() {
   );
 }
 
-function FlowCanvas() {
+interface FlowCanvasProps {
+  templateToImport: CanvasTemplate | null;
+  onTemplateImported: () => void;
+}
+
+function FlowCanvas({ templateToImport, onTemplateImported }: FlowCanvasProps) {
   const reactFlow = useReactFlow();
   const {
     nodes,
@@ -112,6 +118,40 @@ function FlowCanvas() {
   const redo = useRedo();
 
   useKeyboardShortcuts({ reactFlow, undo, redo });
+
+  useEffect(() => {
+    if (!templateToImport) return;
+
+    const allNodeIds = nodes.map((n) => n.id);
+    const allEdgeIds = edges.map((e) => e.id);
+
+    const removeChanges = [
+      ...allNodeIds.map((id) => ({ type: "remove" as const, id })),
+      ...allEdgeIds.map((id) => ({ type: "remove" as const, id })),
+    ];
+    if (removeChanges.length > 0) {
+      onNodesChange(removeChanges as any);
+      onEdgesChange(removeChanges as any);
+    }
+
+    const addNodeChanges = templateToImport.nodes.map((n) => ({
+      type: "add" as const,
+      item: { ...n },
+    }));
+    const addEdgeChanges = templateToImport.edges.map((e) => ({
+      type: "add" as const,
+      item: { ...e },
+    }));
+
+    requestAnimationFrame(() => {
+      onNodesChange(addNodeChanges as any);
+      if (addEdgeChanges.length > 0) {
+        onEdgesChange(addEdgeChanges as any);
+      }
+      reactFlow.fitView({ duration: 300 });
+      onTemplateImported();
+    });
+  }, [templateToImport, nodes, edges, onNodesChange, onEdgesChange, reactFlow, onTemplateImported]);
 
   const [draggingShape, setDraggingShape] = useState<string | null>(null);
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
@@ -261,19 +301,21 @@ function FlowCanvas() {
   );
 }
 
-function Flow() {
+function Flow({ templateToImport, onTemplateImported }: FlowCanvasProps) {
   return (
     <ReactFlowProvider>
-      <FlowCanvas />
+      <FlowCanvas templateToImport={templateToImport} onTemplateImported={onTemplateImported} />
     </ReactFlowProvider>
   );
 }
 
 interface LiveblocksCanvasProps {
   roomId: string;
+  templateToImport?: CanvasTemplate | null;
+  onTemplateImported?: () => void;
 }
 
-export function LiveblocksCanvas({ roomId }: LiveblocksCanvasProps) {
+export function LiveblocksCanvas({ roomId, templateToImport = null, onTemplateImported = () => {} }: LiveblocksCanvasProps) {
   return (
     <LiveblocksErrorBoundary fallback={<CanvasErrorFallback />}>
       <LiveblocksProvider
@@ -288,7 +330,7 @@ export function LiveblocksCanvas({ roomId }: LiveblocksCanvasProps) {
       >
         <RoomProvider id={roomId} initialPresence={{ cursor: null, isThinking: false }}>
           <ClientSideSuspense fallback={<CanvasLoading />}>
-            <Flow />
+            <Flow templateToImport={templateToImport} onTemplateImported={onTemplateImported} />
           </ClientSideSuspense>
         </RoomProvider>
       </LiveblocksProvider>
