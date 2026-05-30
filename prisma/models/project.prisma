@@ -2,6 +2,7 @@ model Project {
   id              String   @id @default(cuid())
   ownerId         String
   name            String
+  roomId          String   @unique
   description     String?
   status          ProjectStatus @default(DRAFT)
   canvasJsonPath  String?
@@ -11,6 +12,7 @@ model Project {
   collaborators   ProjectCollaborator[]
 
   @@index([ownerId])
+  @@index([roomId])
   @@index([createdAt])
 }
 

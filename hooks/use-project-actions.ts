@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { generateRoomId, slugify } from "@/lib/slug";
+import { generateRoomId } from "@/lib/slug";
 import type { Project } from "@/types/projects";
 
 type DialogType = "create" | "rename" | "delete" | null;
@@ -77,9 +77,9 @@ export function useProjectActions(): UseProjectActionsReturn {
 
       if (!res.ok) throw new Error("Failed to create project");
 
-      const roomId = generateRoomId(createName.trim());
+      const data = await res.json();
       close();
-      router.push(`/editor/${roomId}`);
+      router.push(`/editor/${data.roomId}`);
     } catch (err) {
       console.error("Create project failed:", err);
       setIsSubmitting(false);

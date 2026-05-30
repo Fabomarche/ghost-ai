@@ -13,6 +13,7 @@ interface ProjectSidebarProps {
   isOpen: boolean;
   onClose: () => void;
   projects: Project[];
+  activeProjectId?: string;
   onNewProject: () => void;
   onSelect: (project: Project) => void;
   onRename: (project: Project) => void;
@@ -30,11 +31,13 @@ function EmptyProjectsPlaceholder() {
 
 function ProjectItem({
   project,
+  isActive,
   onSelect,
   onRename,
   onDelete,
 }: {
   project: Project;
+  isActive?: boolean;
   onSelect: (project: Project) => void;
   onRename: (project: Project) => void;
   onDelete: (project: Project) => void;
@@ -42,7 +45,17 @@ function ProjectItem({
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <div className="group relative flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-copy-secondary hover:bg-subtle hover:text-copy-primary">
+    <div
+      className={cn(
+        "group relative flex items-center gap-2 rounded-lg px-3 py-2 text-sm",
+        isActive
+          ? "bg-accent text-copy-primary"
+          : "text-copy-secondary hover:bg-subtle hover:text-copy-primary",
+      )}
+    >
+      {isActive && (
+        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />
+      )}
       <button
         type="button"
         className="min-w-0 flex-1 truncate text-left"
@@ -103,6 +116,7 @@ export function ProjectSidebar({
   isOpen,
   onClose,
   projects,
+  activeProjectId,
   onNewProject,
   onSelect,
   onRename,
@@ -155,10 +169,11 @@ export function ProjectSidebar({
                 <EmptyProjectsPlaceholder />
               ) : (
                 <div className="flex flex-col gap-0.5 py-2">
-                  {ownedProjects.map((project) => (
+                    {ownedProjects.map((project) => (
                     <ProjectItem
                       key={project.id}
                       project={project}
+                      isActive={project.id === activeProjectId}
                       onSelect={onSelect}
                       onRename={onRename}
                       onDelete={onDelete}
@@ -172,10 +187,11 @@ export function ProjectSidebar({
                 <EmptyProjectsPlaceholder />
               ) : (
                 <div className="flex flex-col gap-0.5 py-2">
-                  {sharedProjects.map((project) => (
+                    {sharedProjects.map((project) => (
                     <ProjectItem
                       key={project.id}
                       project={project}
+                      isActive={project.id === activeProjectId}
                       onSelect={onSelect}
                       onRename={onRename}
                       onDelete={onDelete}

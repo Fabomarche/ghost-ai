@@ -40,7 +40,7 @@ export function EditorShell({ projects, children }: EditorShellProps) {
   const handleSelect = useCallback(
     (project: Project) => {
       setIsSidebarOpen(false);
-      router.push(`/editor/${project.id}`);
+      router.push(`/editor/${project.roomId}`);
     },
     [router]
   );
