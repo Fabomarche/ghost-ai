@@ -1,5 +1,6 @@
 import { logger, metadata, schemaTask } from "@trigger.dev/sdk";
 import { generateSpecContent } from "@/lib/spec-agent/generate-spec-content";
+import { persistGeneratedSpec } from "@/lib/spec-agent/persist-spec";
 import { generateSpecPayloadSchema } from "@/lib/spec-agent/schemas";
 
 export const generateSpecTask = schemaTask({
@@ -27,15 +28,20 @@ export const generateSpecTask = schemaTask({
 
       const spec = await generateSpecContent(chatHistory, nodes, edges);
 
+      metadata.set("status", "persisting").set("progress", 75);
+
+      const { specId } = await persistGeneratedSpec(projectId, spec);
+
       metadata.set("status", "completed").set("progress", 100);
 
       logger.info("Spec generation completed", {
         projectId,
         roomId,
+        specId,
         contentLength: spec.length,
       });
 
-      return { spec };
+      return { spec, specId };
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Unknown error occurred";
