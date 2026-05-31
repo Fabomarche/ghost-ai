@@ -28,6 +28,10 @@ declare global {
 
     FeedMessageData: {
       text?: string;
+      sender?: string;
+      role?: "user" | "assistant";
+      content?: string;
+      timestamp?: number;
     };
   }
 }

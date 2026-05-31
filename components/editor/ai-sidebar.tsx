@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { useAiChatFeed } from "@/hooks/use-ai-chat-feed";
 import { useAiGenerationState } from "@/hooks/use-ai-generation-state";
 
 interface AiSidebarProps {
@@ -15,10 +16,11 @@ interface AiSidebarProps {
   onClose: () => void;
 }
 
-interface Message {
-  id: string;
-  sender: "user" | "assistant";
-  content: string;
+function formatChatTimestamp(timestamp: number): string {
+  return new Date(timestamp).toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 const STARTER_CHIPS = [
@@ -29,8 +31,8 @@ const STARTER_CHIPS = [
 
 export function AiSidebar({ isOpen, onClose }: AiSidebarProps) {
   const [activeTab, setActiveTab] = useState("architect");
-  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
+  const { messages, sendMessage, sendError } = useAiChatFeed();
   const { isGenerating, statusText } = useAiGenerationState();
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -54,15 +56,16 @@ export function AiSidebar({ isOpen, onClose }: AiSidebarProps) {
     textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
   }, [inputValue]);
 
-  const handleSend = (text: string) => {
+  const handleSend = async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || isGenerating) return;
 
-    setMessages((prev) => [
-      ...prev,
-      { id: `user-${Date.now()}`, sender: "user", content: trimmed },
-    ]);
-    setInputValue("");
+    try {
+      await sendMessage(trimmed);
+      setInputValue("");
+    } catch {
+      // sendError is set in useAiChatFeed
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -182,11 +185,17 @@ export function AiSidebar({ isOpen, onClose }: AiSidebarProps) {
                     key={msg.id}
                     className={cn(
                       "flex max-w-[85%] flex-col rounded-2xl p-3 text-xs leading-relaxed",
-                      msg.sender === "user"
+                      msg.role === "user"
                         ? "self-end rounded-br-none border-2 border-brand/50 bg-accent-dim text-copy-primary"
                         : "self-start rounded-bl-none border border-surface-border bg-elevated text-ai-text",
                     )}
                   >
+                    <div className="mb-1 flex items-center gap-2 text-[0.6rem] text-copy-faint">
+                      <span className="font-medium text-copy-muted">
+                        {msg.sender}
+                      </span>
+                      <span>{formatChatTimestamp(msg.timestamp)}</span>
+                    </div>
                     <div className="break-words whitespace-pre-line">
                       {msg.content}
                     </div>
@@ -222,9 +231,15 @@ export function AiSidebar({ isOpen, onClose }: AiSidebarProps) {
                 )}
               </Button>
             </div>
-            <p className="mt-1.5 text-center text-[0.6rem] text-copy-faint">
-              Enter sends, Shift+Enter for new line
-            </p>
+            {sendError ? (
+              <p className="mt-1.5 text-center text-[0.6rem] text-destructive">
+                {sendError}
+              </p>
+            ) : (
+              <p className="mt-1.5 text-center text-[0.6rem] text-copy-faint">
+                Enter sends, Shift+Enter for new line
+              </p>
+            )}
           </div>
         </TabsContent>
 
