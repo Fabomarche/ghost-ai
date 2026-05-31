@@ -25,6 +25,10 @@ declare global {
     GroupInfo: {};
 
     ActivitiesData: {};
+
+    FeedMessageData: {
+      text?: string;
+    };
   }
 }
 

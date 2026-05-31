@@ -4,7 +4,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- AI backend — design agent logic (done)
+- AI UI — shared presence and status (done)
 
 ## Current Goal
 
@@ -35,6 +35,7 @@ Update this file whenever the current phase, active feature, or implementation s
 - `22-trigger-setup` — Trigger.dev v4.4.6 integrated. `@trigger.dev/sdk` and `@trigger.dev/build` installed. `trigger.config.ts` configured with Prisma 7 engine-only build extension. `trigger/example.ts` sample task added. `trigger:dev` and `trigger:deploy` npm scripts added. Requires `TRIGGER_PROJECT_REF` and `TRIGGER_SECRET_KEY` env vars.
 - `22-design-agent-api` — Design generation backend wiring (no AI logic). `TaskRun` Prisma model (`runId` PK, `projectId`, `userId`, `createdAt`, compound index on `userId` + `projectId`). `POST /api/ai/design` validates prompt/roomId/projectId, checks project access, triggers `design-agent` task, persists `TaskRun`, returns `runId`. `POST /api/ai/design/token` verifies `TaskRun` ownership and returns a run-scoped Trigger.dev public token. `trigger/design-agent.ts` minimal task logs/echoes `prompt` and `roomId`. `npm run build` passes.
 - `23-design-agent-logic` — Full AI design agent task. `types/tasks.ts` with `aiStatusFeedMessageSchema` for `ai-status-feed` payloads. `lib/liveblocks-collaborative-flow.ts` wraps `mutateFlow`, ephemeral AI presence (`setPresence`), and status feed publishing (`createFeedMessage`). `lib/design-agent/` Gemini plan generation (`generateObject` + `@ai-sdk/google`) and canvas action application (add/move/resize/update/delete nodes, add/delete edges) with palette/shape/layout validation. `trigger/design-agent.ts` orchestrates status messages, thinking presence, progressive canvas updates, and error cleanup. `npm run build` passes.
+- `24-ai-presence-state` — Shared AI activity UI. `lib/liveblocks-constants.ts` with `AI_STATUS_FEED_ID` and `AI_AGENT_USER_ID` for safe client imports. `hooks/use-ai-generation-state.ts` subscribes to `ai-status-feed` via `useFeedMessages`, validates payloads with `parseAiStatusFeedMessage`, and derives `isGenerating` from room presence `thinking`. `ai-sidebar.tsx` shows a shared status bar, disables chat input/send while generating, and shows a spinner on the send button. `live-cursors.tsx` shows a spinner in name badges when `thinking: true`. `AiSidebar` moved inside `RoomProvider` in `liveblocks-canvas.tsx`. `liveblocks.config.ts` typed `FeedMessageData`. `npm run build` passes.
 
 ## In Progress
 
@@ -42,7 +43,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Next Up
 
-- `24-ai-presence-state` — shared AI status UI, thinking indicators, and feed subscription in the sidebar.
+- `25-sidebar-chat-feed` — Liveblocks `ai-chat` feed for persistent sidebar chat messages.
 
 ## Open Questions
 

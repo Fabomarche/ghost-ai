@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Bot, X, Send, FileText, Download } from "lucide-react";
+import { Bot, X, Send, FileText, Download, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { useAiGenerationState } from "@/hooks/use-ai-generation-state";
 
 interface AiSidebarProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ export function AiSidebar({ isOpen, onClose }: AiSidebarProps) {
   const [activeTab, setActiveTab] = useState("architect");
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
+  const { isGenerating, statusText } = useAiGenerationState();
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -54,7 +56,7 @@ export function AiSidebar({ isOpen, onClose }: AiSidebarProps) {
 
   const handleSend = (text: string) => {
     const trimmed = text.trim();
-    if (!trimmed) return;
+    if (!trimmed || isGenerating) return;
 
     setMessages((prev) => [
       ...prev,
@@ -107,6 +109,15 @@ export function AiSidebar({ isOpen, onClose }: AiSidebarProps) {
         </Button>
       </div>
 
+      {isGenerating && (
+        <div className="flex shrink-0 items-center gap-2 border-b border-surface-border bg-accent-dim/50 px-4 py-2">
+          <Loader2 className="h-3 w-3 shrink-0 animate-spin text-brand" />
+          <p className="truncate text-[0.65rem] font-medium text-ai-text">
+            {statusText ?? "AI is working…"}
+          </p>
+        </div>
+      )}
+
       <Tabs
         value={activeTab}
         onValueChange={setActiveTab}
@@ -155,8 +166,9 @@ export function AiSidebar({ isOpen, onClose }: AiSidebarProps) {
                     <button
                       key={label}
                       type="button"
+                      disabled={isGenerating}
                       onClick={() => handleSend(label)}
-                      className="w-full rounded-xl bg-subtle px-3 py-2 text-left text-xs font-medium text-ai-text transition-colors hover:bg-subtle-border/40"
+                      className="w-full rounded-xl bg-subtle px-3 py-2 text-left text-xs font-medium text-ai-text transition-colors hover:bg-subtle-border/40 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {label}
                     </button>
@@ -191,18 +203,23 @@ export function AiSidebar({ isOpen, onClose }: AiSidebarProps) {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
+                disabled={isGenerating}
                 placeholder="Ask AI to design something..."
                 rows={3}
-                className="max-h-[160px] min-h-[72px] flex-1 resize-none border-0 bg-transparent px-2 py-1.5 text-xs text-copy-primary outline-none placeholder:text-copy-faint focus-visible:border-0 focus-visible:ring-0"
+                className="max-h-[160px] min-h-[72px] flex-1 resize-none border-0 bg-transparent px-2 py-1.5 text-xs text-copy-primary outline-none placeholder:text-copy-faint focus-visible:border-0 focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50"
               />
               <Button
                 type="button"
                 onClick={() => handleSend(inputValue)}
-                disabled={!inputValue.trim()}
+                disabled={!inputValue.trim() || isGenerating}
                 size="icon-sm"
                 className="shrink-0 rounded-lg bg-brand text-white hover:bg-brand/90 disabled:bg-subtle disabled:text-copy-faint"
               >
-                <Send className="h-3.5 w-3.5" />
+                {isGenerating ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Send className="h-3.5 w-3.5" />
+                )}
               </Button>
             </div>
             <p className="mt-1.5 text-center text-[0.6rem] text-copy-faint">

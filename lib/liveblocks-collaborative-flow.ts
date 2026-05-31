@@ -2,9 +2,9 @@ import { mutateFlow, type MutableFlow } from "@liveblocks/react-flow/node";
 import type { CanvasEdge, CanvasNode } from "@/types/canvas";
 import { parseAiStatusFeedMessage } from "@/types/tasks";
 import { getLiveblocksClient } from "@/lib/liveblocks";
+import { AI_AGENT_USER_ID, AI_STATUS_FEED_ID } from "@/lib/liveblocks-constants";
 
-export const AI_AGENT_USER_ID = "ghost-ai-agent";
-export const AI_STATUS_FEED_ID = "ai-status-feed";
+export { AI_AGENT_USER_ID, AI_STATUS_FEED_ID };
 
 const AI_AGENT_INFO = {
   name: "Ghost AI",

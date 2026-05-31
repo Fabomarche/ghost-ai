@@ -1,6 +1,7 @@
 "use client";
 
 import { useOthers } from "@liveblocks/react";
+import { Loader2 } from "lucide-react";
 
 interface LiveCursorsProps {
   currentUserId: string;
@@ -19,6 +20,7 @@ export function LiveCursors({ currentUserId }: LiveCursorsProps) {
 
         const info = other.info;
         const color = info.color;
+        const isThinking = other.presence.thinking === true;
 
         return (
           <div
@@ -44,12 +46,15 @@ export function LiveCursors({ currentUserId }: LiveCursorsProps) {
               />
             </svg>
             <div
-              className="ml-3 -mt-0.5 whitespace-nowrap rounded-full px-2 py-0.5 text-[0.6rem] font-medium leading-none"
+              className="ml-3 -mt-0.5 flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[0.6rem] font-medium leading-none"
               style={{
                 backgroundColor: color,
                 color: "var(--bg-base)",
               }}
             >
+              {isThinking && (
+                <Loader2 className="h-2.5 w-2.5 shrink-0 animate-spin" />
+              )}
               {info.name}
             </div>
           </div>

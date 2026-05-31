@@ -31,6 +31,7 @@ import { NodeColorToolbar } from "@/components/editor/node-color-toolbar";
 import { CanvasControlBar } from "@/components/editor/canvas-control-bar";
 import { PresenceAvatars } from "@/components/editor/presence-avatars";
 import { LiveCursors } from "@/components/editor/live-cursors";
+import { AiSidebar } from "@/components/editor/ai-sidebar";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import {
   useCanvasAutosave,
@@ -384,6 +385,8 @@ interface LiveblocksCanvasProps {
   onTemplateImported?: () => void;
   onSaveStatusChange?: (status: CanvasSaveStatus) => void;
   onSaveReady?: (save: () => Promise<void>) => void;
+  aiSidebarOpen?: boolean;
+  onAiSidebarClose?: () => void;
 }
 
 export function LiveblocksCanvas({
@@ -394,6 +397,8 @@ export function LiveblocksCanvas({
   onTemplateImported = () => {},
   onSaveStatusChange,
   onSaveReady,
+  aiSidebarOpen = false,
+  onAiSidebarClose = () => {},
 }: LiveblocksCanvasProps) {
   return (
     <LiveblocksErrorBoundary fallback={<CanvasErrorFallback />}>
@@ -417,6 +422,9 @@ export function LiveblocksCanvas({
               onSaveStatusChange={onSaveStatusChange}
               onSaveReady={onSaveReady}
             />
+          </ClientSideSuspense>
+          <ClientSideSuspense fallback={null}>
+            <AiSidebar isOpen={aiSidebarOpen} onClose={onAiSidebarClose} />
           </ClientSideSuspense>
         </RoomProvider>
       </LiveblocksProvider>

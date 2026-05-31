@@ -14,7 +14,6 @@ import { ShareDialog } from "@/components/editor/share-dialog";
 import { StarterTemplatesModal } from "@/components/editor/starter-templates-modal";
 import { EditorProvider } from "@/components/editor/editor-context";
 import { LiveblocksCanvas } from "@/components/editor/liveblocks-canvas";
-import { AiSidebar } from "@/components/editor/ai-sidebar";
 import { useProjectActions } from "@/hooks/use-project-actions";
 import type { CanvasSaveStatus } from "@/hooks/use-canvas-autosave";
 import type { Project } from "@/types/projects";
@@ -172,10 +171,8 @@ export function WorkspaceShell({ project, projects }: WorkspaceShellProps) {
           onSaveReady={(save) => {
             saveCanvasRef.current = save;
           }}
-        />
-        <AiSidebar
-          isOpen={aiSidebarOpen}
-          onClose={() => setAiSidebarOpen(false)}
+          aiSidebarOpen={aiSidebarOpen}
+          onAiSidebarClose={() => setAiSidebarOpen(false)}
         />
       </div>
 
