@@ -4,7 +4,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- AI UI — functional chat submit + run tracking (done)
+- Spec generation backend flow (done)
 
 ## Current Goal
 
@@ -38,6 +38,7 @@ Update this file whenever the current phase, active feature, or implementation s
 - `24-ai-presence-state` — Shared AI activity UI. `lib/liveblocks-constants.ts` with `AI_STATUS_FEED_ID` and `AI_AGENT_USER_ID` for safe client imports. `hooks/use-ai-generation-state.ts` subscribes to `ai-status-feed` via `useFeedMessages`, validates payloads with `parseAiStatusFeedMessage`, and derives `isGenerating` from room presence `thinking`. `ai-sidebar.tsx` shows a shared status bar, disables chat input/send while generating, and shows a spinner on the send button. `live-cursors.tsx` shows a spinner in name badges when `thinking: true`. `AiSidebar` moved inside `RoomProvider` in `liveblocks-canvas.tsx`. `liveblocks.config.ts` typed `FeedMessageData`. `npm run build` passes.
 - `25-sidebar-chat-feed` — Room-scoped Liveblocks `ai-chat` feed for collaborative sidebar chat. `lib/liveblocks-constants.ts` adds `AI_CHAT_FEED_ID` separate from `AI_STATUS_FEED_ID`. `types/tasks.ts` adds `aiChatFeedMessageSchema` (sender, role, content, timestamp) and `parseAiChatFeedMessage`. `hooks/use-ai-chat-feed.ts` ensures the feed exists, subscribes via `useFeedMessages`, and sends with `useCreateFeedMessage`. `ai-sidebar.tsx` renders validated messages with sender and timestamp, clears input on successful send, and shows a compact send error. `liveblocks.config.ts` extends `FeedMessageData` for chat payloads. `npm run build` passes.
 - `26-ai-chat-functional` — AI sidebar submit wired to design generation. On send: user message to `ai-chat`, `POST /api/ai/design` with `{ prompt, roomId, projectId }`, run-scoped token via `/api/ai/design/token` when needed, local `runId`/`publicToken` state, and `useRealtimeRun` for status. Input/send disabled while a run is active; completion pushes an assistant message to `ai-chat`. Compact status strip above input reads `ai-status-feed` during active runs. Canvas updates remain Liveblocks-driven. `hooks/use-ai-chat-feed.ts` adds `sendAssistantMessage`. `AiSidebar` receives `roomId`/`projectId` from `LiveblocksCanvas`. `npm run build` passes.
+- `27-spec-generation-flow` — Spec generation backend wiring (no frontend). `lib/spec-agent/schemas.ts` Zod schemas for trigger request and task payload (`roomId`, `chatHistory`, `nodes`, `edges`; project access resolved server-side). `POST /api/ai/spec` authenticates user, resolves project via `getProjectForUser(roomId)` (no client `projectId`), triggers `generate-spec` task, persists `TaskRun`, returns `runId`. `POST /api/ai/spec/token` verifies `TaskRun` ownership and returns 1h run-scoped public token. `trigger/generate-spec.ts` `schemaTask` validates payload, calls Gemini via `generateText`, updates run metadata (`status`, `progress`), returns `{ spec }` Markdown output. `lib/spec-agent/prompt.ts` and `generate-spec-content.ts` build prompts and generate content. `npm run build` passes.
 
 ## In Progress
 
@@ -45,7 +46,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Next Up
 
-- None.
+- `28-spec-persistence-download` — Persist generated specs to Vercel Blob and add secure download route.
 
 ## Open Questions
 
