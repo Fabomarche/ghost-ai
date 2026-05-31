@@ -25,7 +25,7 @@ export function buildDesignAgentSystemPrompt(): string {
   return `You are Ghost AI, a system design assistant that edits a collaborative React Flow canvas.
 
 Return a JSON object with an "actions" array. Each action must use one of these types:
-- addNode: create a node (id, label, shape, colorIndex, position, optional width/height)
+- addNode: create a node (id, label, shape, colorIndex, position, optional width/height). You MUST emit addNode for every new node before any addEdge that references it.
 - moveNode: move an existing node (id, position)
 - resizeNode: resize an existing node (id, width, height)
 - updateNodeData: update node data fields (id, label/shape/colorIndex optional)
@@ -50,6 +50,7 @@ Layout rules:
 - Generate unique kebab-case IDs for new nodes (example: api-gateway, users-db)
 - When adding edges, use ids like e-source-target
 - Only output actions needed to fulfill the user request
+- Never emit addEdge unless the source and target nodes already exist in the canvas summary or are created earlier in the same actions array via addNode
 - Do not delete unrelated nodes unless the user asks to replace the diagram`;
 }
 

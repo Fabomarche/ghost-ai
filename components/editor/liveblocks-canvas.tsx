@@ -38,6 +38,7 @@ import {
   type CanvasSaveStatus,
 } from "@/hooks/use-canvas-autosave";
 import { NODE_COLORS, SHAPE_DEFAULT_SIZES } from "@/types/canvas";
+import { canvasFlowSyncOptions } from "@/lib/liveblocks-flow-sync";
 import type { CanvasTemplate } from "@/components/editor/starter-templates";
 
 const nodeTypes = {
@@ -130,7 +131,7 @@ function FlowCanvas({
     onConnect,
     onDelete,
     isLoading,
-  } = useLiveblocksFlow({ suspense: true });
+  } = useLiveblocksFlow({ suspense: true, ...canvasFlowSyncOptions });
 
   const undo = useUndo();
   const redo = useRedo();
@@ -424,7 +425,12 @@ export function LiveblocksCanvas({
             />
           </ClientSideSuspense>
           <ClientSideSuspense fallback={null}>
-            <AiSidebar isOpen={aiSidebarOpen} onClose={onAiSidebarClose} />
+            <AiSidebar
+              isOpen={aiSidebarOpen}
+              onClose={onAiSidebarClose}
+              roomId={roomId}
+              projectId={projectId}
+            />
           </ClientSideSuspense>
         </RoomProvider>
       </LiveblocksProvider>

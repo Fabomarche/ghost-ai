@@ -1,5 +1,6 @@
 import { task, logger } from "@trigger.dev/sdk";
 import { generateDesignActions } from "@/lib/design-agent/generate-actions";
+import { prepareDesignActions } from "@/lib/design-agent/prepare-actions";
 import { applyDesignActions, readCanvasState } from "@/lib/design-agent/apply-actions";
 import {
   clearAiPresence,
@@ -24,7 +25,8 @@ export const designAgentTask = task({
       const canvas = await readCanvasState(roomId);
 
       await publishAiStatus(roomId, "Analyzing your request...");
-      const actions = await generateDesignActions(prompt, canvas);
+      const rawActions = await generateDesignActions(prompt, canvas);
+      const actions = prepareDesignActions(rawActions, canvas);
 
       if (actions.length === 0) {
         await publishAiStatus(roomId, "No canvas changes were needed.");

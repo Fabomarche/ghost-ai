@@ -2,6 +2,7 @@ import { mutateFlow, type MutableFlow } from "@liveblocks/react-flow/node";
 import type { CanvasEdge, CanvasNode } from "@/types/canvas";
 import { parseAiStatusFeedMessage } from "@/types/tasks";
 import { getLiveblocksClient } from "@/lib/liveblocks";
+import { canvasFlowSyncOptions } from "@/lib/liveblocks-flow-sync";
 import { AI_AGENT_USER_ID, AI_STATUS_FEED_ID } from "@/lib/liveblocks-constants";
 
 export { AI_AGENT_USER_ID, AI_STATUS_FEED_ID };
@@ -61,7 +62,7 @@ export async function mutateCanvasFlow(
 ): Promise<void> {
   const client = getLiveblocksClient();
 
-  await mutateFlow({ client, roomId }, callback);
+  await mutateFlow({ client, roomId, ...canvasFlowSyncOptions }, callback);
 }
 
 export function flowPositionToCursor(

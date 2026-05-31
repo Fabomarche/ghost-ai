@@ -55,6 +55,16 @@ export function useAiChatFeed() {
     [messages],
   );
 
+  const publishMessage = useCallback(
+    async (payload: AiChatFeedMessage) => {
+      if (!feedReady) {
+        await createFeed(AI_CHAT_FEED_ID);
+      }
+      await createFeedMessage(AI_CHAT_FEED_ID, payload);
+    },
+    [createFeed, createFeedMessage, feedReady],
+  );
+
   const sendMessage = useCallback(
     async (content: string) => {
       const trimmed = content.trim();
@@ -71,17 +81,36 @@ export function useAiChatFeed() {
       };
 
       try {
-        if (!feedReady) {
-          await createFeed(AI_CHAT_FEED_ID);
-        }
-        await createFeedMessage(AI_CHAT_FEED_ID, payload);
+        await publishMessage(payload);
       } catch {
         setSendError("Failed to send message. Try again.");
         throw new Error("send_failed");
       }
     },
-    [createFeed, createFeedMessage, feedReady, self],
+    [publishMessage, self],
   );
 
-  return { messages: chatMessages, sendMessage, sendError };
+  const sendAssistantMessage = useCallback(
+    async (content: string) => {
+      const trimmed = content.trim();
+      if (!trimmed) return;
+
+      const payload: AiChatFeedMessage = {
+        sender: "Ghost AI",
+        role: "assistant",
+        content: trimmed,
+        timestamp: Date.now(),
+      };
+
+      try {
+        await publishMessage(payload);
+      } catch {
+        setSendError("Failed to send message. Try again.");
+        throw new Error("send_failed");
+      }
+    },
+    [publishMessage],
+  );
+
+  return { messages: chatMessages, sendMessage, sendAssistantMessage, sendError };
 }

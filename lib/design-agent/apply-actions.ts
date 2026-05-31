@@ -148,15 +148,17 @@ export async function applyDesignActions(
   roomId: string,
   actions: DesignAction[],
 ): Promise<void> {
-  for (const action of actions) {
-    await mutateCanvasFlow(async (flow) => {
-      applyActionToFlow(flow, action);
+  let lastCursor: { x: number; y: number } | null = null;
 
-      const cursor = getActionCursorTarget(flow, action);
-      if (cursor) {
-        await setAiPresence(roomId, { cursor, thinking: true });
-      }
-    }, roomId);
+  await mutateCanvasFlow(async (flow) => {
+    for (const action of actions) {
+      applyActionToFlow(flow, action);
+      lastCursor = getActionCursorTarget(flow, action) ?? lastCursor;
+    }
+  }, roomId);
+
+  if (lastCursor) {
+    await setAiPresence(roomId, { cursor: lastCursor, thinking: true });
   }
 }
 
