@@ -4,7 +4,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Spec persistence and download (done)
+- Spec UI integration (done)
 
 ## Current Goal
 
@@ -40,6 +40,7 @@ Update this file whenever the current phase, active feature, or implementation s
 - `26-ai-chat-functional` — AI sidebar submit wired to design generation. On send: user message to `ai-chat`, `POST /api/ai/design` with `{ prompt, roomId, projectId }`, run-scoped token via `/api/ai/design/token` when needed, local `runId`/`publicToken` state, and `useRealtimeRun` for status. Input/send disabled while a run is active; completion pushes an assistant message to `ai-chat`. Compact status strip above input reads `ai-status-feed` during active runs. Canvas updates remain Liveblocks-driven. `hooks/use-ai-chat-feed.ts` adds `sendAssistantMessage`. `AiSidebar` receives `roomId`/`projectId` from `LiveblocksCanvas`. `npm run build` passes.
 - `27-spec-generation-flow` — Spec generation backend wiring (no frontend). `lib/spec-agent/schemas.ts` Zod schemas for trigger request and task payload (`roomId`, `chatHistory`, `nodes`, `edges`; project access resolved server-side). `POST /api/ai/spec` authenticates user, resolves project via `getProjectForUser(roomId)` (no client `projectId`), triggers `generate-spec` task, persists `TaskRun`, returns `runId`. `POST /api/ai/spec/token` verifies `TaskRun` ownership and returns 1h run-scoped public token. `trigger/generate-spec.ts` `schemaTask` validates payload, calls Gemini via `generateText`, updates run metadata (`status`, `progress`), returns `{ spec }` Markdown output. `lib/spec-agent/prompt.ts` and `generate-spec-content.ts` build prompts and generate content. `npm run build` passes.
 - `28-spec-persistence-download` — Spec persistence via Vercel Blob and Prisma `ProjectSpec`. `ProjectSpec` model (`id`, `projectId`, `filePath`, `createdAt`) with cascade delete and index on `projectId` + `createdAt`. `lib/spec-agent/persist-spec.ts` uploads Markdown to `specs/{projectId}/{specId}.md` (private blob) and stores blob URL in `filePath`. `trigger/generate-spec.ts` persists after generation and returns `{ spec, specId }`. `GET /api/projects/[projectId]/specs/[specId]/download` authenticates via `getProjectByIdForUser`, verifies spec belongs to project, fetches from blob, returns Markdown attachment. No frontend changes. `npm run build` passes.
+- `29-spec-ui-integration` — Spec list, preview modal, and download wired into the AI sidebar Specs tab. `GET /api/projects/[projectId]/specs` returns project spec metadata (`id`, `createdAt`, `filename`). `hooks/use-project-specs.ts` fetches the list when the Specs tab is active. `components/editor/spec-preview-modal.tsx` loads content via the download endpoint, renders Markdown with `react-markdown`, and supports download + keyboard close via shadcn `Dialog`. Specs tab shows a compact scrollable list with per-item download actions. `Generate Spec` triggers `POST /api/ai/spec` with canvas nodes/edges and chat history, tracks the run via Trigger.dev realtime, and refreshes the list on completion. `lib/spec-filename.ts` shared filename/download URL helpers. `npm run build` passes.
 
 ## In Progress
 
@@ -47,7 +48,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Next Up
 
-- `29-spec-ui-integration` — Wire spec list, preview modal, and download into the AI sidebar Specs tab.
+- None.
 
 ## Open Questions
 

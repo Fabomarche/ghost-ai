@@ -214,3 +214,101 @@ select {
   stroke-width: 2;
   stroke-dasharray: 5 5;
 }
+
+.prose-spec > :first-child {
+  margin-top: 0;
+}
+
+.prose-spec > :last-child {
+  margin-bottom: 0;
+}
+
+.prose-spec h1,
+.prose-spec h2,
+.prose-spec h3,
+.prose-spec h4 {
+  color: var(--text-primary);
+  font-weight: 600;
+  line-height: 1.35;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-spec h1 {
+  font-size: 1rem;
+}
+
+.prose-spec h2 {
+  font-size: 0.9rem;
+}
+
+.prose-spec h3,
+.prose-spec h4 {
+  font-size: 0.85rem;
+}
+
+.prose-spec p,
+.prose-spec ul,
+.prose-spec ol,
+.prose-spec pre,
+.prose-spec blockquote {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-spec ul,
+.prose-spec ol {
+  padding-left: 1.25rem;
+}
+
+.prose-spec ul {
+  list-style-type: disc;
+}
+
+.prose-spec ol {
+  list-style-type: decimal;
+}
+
+.prose-spec li + li {
+  margin-top: 0.25rem;
+}
+
+.prose-spec code {
+  font-family: var(--font-geist-mono);
+  font-size: 0.85em;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-default);
+  border-radius: 0.375rem;
+  padding: 0.1rem 0.35rem;
+}
+
+.prose-spec pre {
+  overflow-x: auto;
+  border: 1px solid var(--border-default);
+  border-radius: 0.75rem;
+  background: var(--bg-subtle);
+  padding: 0.75rem;
+}
+
+.prose-spec pre code {
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.prose-spec blockquote {
+  border-left: 2px solid var(--border-subtle);
+  padding-left: 0.75rem;
+  color: var(--text-muted);
+}
+
+.prose-spec a {
+  color: var(--accent-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.prose-spec strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
